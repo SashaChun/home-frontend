@@ -10,7 +10,7 @@ import {
   HOUSING_TYPE_LABELS,
   RENT_TERM_LABELS,
   AMENITY_LABELS,
-} from '../../../shared/constants.js';
+} from '../shared/constants.js';
 
 export default function ListingDetail() {
   const { id } = useParams();

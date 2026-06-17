@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { HOUSING_TYPE_LABELS } from '../../../shared/constants.js';
+import { HOUSING_TYPE_LABELS } from '../shared/constants.js';
 
 const PLACEHOLDER =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="%232dd4bf"/><stop offset="1" stop-color="%2338bdf8"/></linearGradient></defs><rect width="400" height="300" fill="url(%23g)"/><text x="200" y="160" font-family="Manrope" font-size="22" fill="white" text-anchor="middle" font-weight="700">Domivka</text></svg>';

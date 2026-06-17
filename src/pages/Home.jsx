@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Container from '../components/Container.jsx';
 import Button from '../components/Button.jsx';
-import { CITIES } from '../../../shared/constants.js';
+import { CITIES } from '../shared/constants.js';
 
 export default function Home() {
   const [city, setCity] = useState('');

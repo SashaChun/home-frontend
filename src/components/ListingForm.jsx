@@ -11,7 +11,7 @@ import {
   AMENITIES,
   AMENITY_LABELS,
   CITIES,
-} from '../../../shared/constants.js';
+} from '../shared/constants.js';
 
 const empty = {
   title: '',

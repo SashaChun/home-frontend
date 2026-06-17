@@ -9,7 +9,7 @@ import {
   RENT_TERM_LABELS,
   AMENITIES,
   AMENITY_LABELS,
-} from '../../../shared/constants.js';
+} from '../shared/constants.js';
 
 const SECTION = {
   borderBottom: '1px solid var(--border)',
