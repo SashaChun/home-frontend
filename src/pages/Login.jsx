@@ -1,19 +1,10 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { firebaseAuth, isFirebaseConfigured } from '../auth/firebase.js';
+import { useAuth } from '../auth/useAuth.js';
 import Container from '../components/Container.jsx';
 import Input from '../components/Input.jsx';
 import Button from '../components/Button.jsx';
 import { useToast } from '../components/Toast.jsx';
-
-const FIREBASE_ERROR_LABELS = {
-  'auth/invalid-credential': 'Невірний email або пароль',
-  'auth/user-not-found': 'Користувача не знайдено',
-  'auth/wrong-password': 'Невірний пароль',
-  'auth/too-many-requests': 'Забагато спроб. Спробуйте пізніше',
-  'auth/invalid-email': 'Невірний формат email',
-};
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -23,22 +14,19 @@ export default function Login() {
   const navigate = useNavigate();
   const loc = useLocation();
   const toast = useToast();
+  const { login } = useAuth();
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    if (!isFirebaseConfigured) {
-      setError('Firebase не налаштовано. Заповніть VITE_FIREBASE_* у client/.env');
-      return;
-    }
     setBusy(true);
     try {
-      await signInWithEmailAndPassword(firebaseAuth, email, password);
+      await login(email, password);
       const to = loc.state?.from?.pathname || '/profile';
       toast?.push('Ласкаво просимо!', 'success');
       navigate(to, { replace: true });
     } catch (err) {
-      setError(FIREBASE_ERROR_LABELS[err.code] || err.message);
+      setError(err.uiMessage || err.message);
     } finally {
       setBusy(false);
     }

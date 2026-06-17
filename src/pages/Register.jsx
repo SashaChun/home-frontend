@@ -1,19 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { firebaseAuth, isFirebaseConfigured } from '../auth/firebase.js';
-import { api } from '../api/client.js';
 import { useAuth } from '../auth/useAuth.js';
 import Container from '../components/Container.jsx';
 import Input from '../components/Input.jsx';
 import Button from '../components/Button.jsx';
 import { useToast } from '../components/Toast.jsx';
-
-const FIREBASE_ERROR_LABELS = {
-  'auth/email-already-in-use': 'Користувач з таким email уже існує',
-  'auth/invalid-email': 'Невірний формат email',
-  'auth/weak-password': 'Пароль занадто слабкий (мін. 8 символів)',
-};
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -24,33 +15,20 @@ export default function Register() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const toast = useToast();
-  const { setProfile } = useAuth();
+  const { register } = useAuth();
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    if (!isFirebaseConfigured) {
-      setError('Firebase не налаштовано. Заповніть VITE_FIREBASE_* у client/.env');
-      return;
-    }
-    if (password !== confirm) {
-      setError('Паролі не співпадають');
-      return;
-    }
-    if (password.length < 8) {
-      setError('Пароль має містити мінімум 8 символів');
-      return;
-    }
+    if (password !== confirm) { setError('Паролі не співпадають'); return; }
+    if (password.length < 8) { setError('Пароль має містити мінімум 8 символів'); return; }
     setBusy(true);
     try {
-      const cred = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-      await updateProfile(cred.user, { displayName: name });
-      const r = await api.post('/auth/sync', { displayName: name });
-      setProfile(r.data.data);
+      await register(name, email, password);
       toast?.push('Акаунт створено!', 'success');
       navigate('/profile', { replace: true });
     } catch (err) {
-      setError(FIREBASE_ERROR_LABELS[err.code] || err.uiMessage || err.message);
+      setError(err.uiMessage || err.message);
     } finally {
       setBusy(false);
     }

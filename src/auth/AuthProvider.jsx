@@ -1,6 +1,4 @@
-import { createContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { firebaseAuth } from './firebase.js';
+import { createContext, useCallback, useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 
 export const AuthContext = createContext(null);
@@ -11,27 +9,43 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(firebaseAuth, async (u) => {
-      setUser(u);
-      if (u) {
-        try {
-          const r = await api.get('/auth/me');
-          setProfile(r.data.data);
-        } catch {
-          setProfile(null);
-        }
-      } else {
-        setProfile(null);
-      }
-      setLoading(false);
-    });
-    return unsub;
+    const token = localStorage.getItem('accessToken');
+    if (!token) { setLoading(false); return; }
+    api.get('/auth/me')
+      .then((r) => {
+        const data = r.data.data;
+        setUser({ id: data.id, uid: data.id, email: data.email });
+        setProfile(data);
+      })
+      .catch(() => localStorage.removeItem('accessToken'))
+      .finally(() => setLoading(false));
   }, []);
 
-  const logout = () => signOut(firebaseAuth);
+  const login = useCallback(async (email, password) => {
+    const r = await api.post('/auth/login', { email, password });
+    localStorage.setItem('accessToken', r.data.accessToken);
+    const data = r.data.data;
+    setUser({ id: data.id, uid: data.id, email: data.email });
+    setProfile(data);
+  }, []);
+
+  const register = useCallback(async (displayName, email, password) => {
+    const r = await api.post('/auth/register', { displayName, email, password });
+    localStorage.setItem('accessToken', r.data.accessToken);
+    const data = r.data.data;
+    setUser({ id: data.id, uid: data.id, email: data.email });
+    setProfile(data);
+  }, []);
+
+  const logout = useCallback(async () => {
+    await api.post('/auth/logout').catch(() => {});
+    localStorage.removeItem('accessToken');
+    setUser(null);
+    setProfile(null);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, logout, setProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, login, register, logout, setProfile }}>
       {children}
     </AuthContext.Provider>
   );
